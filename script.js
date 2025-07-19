@@ -1,5 +1,6 @@
 const model = {
     table: '',
+    compareTable: '',
     fields: [],
     filter: '',
     startDate: '',
@@ -34,6 +35,7 @@ const controller = {
     },
     updateModel() {
         model.table = document.getElementById('table').value;
+        model.compareTable = document.getElementById('compare_table').value;
         model.fields = document.getElementById('fields').value.split(',').map(field => field.trim());
         model.filter = document.getElementById('filter').value;
         model.startDate = document.getElementById('start_date').value;
@@ -89,6 +91,10 @@ const controller = {
         if (conditions.length > 0) {
             whereClause = "WHERE " + conditions.join(" AND ");
         }
+
+        if (model.compareTable) {
+            return `SELECT (SELECT COUNT(*) FROM ${model.table} ${whereClause}) AS total_tabla_1, (SELECT COUNT(*) FROM ${model.compareTable} ${whereClause}) AS total_tabla_2;`;
+        }
         return `SELECT COUNT(*) FROM ${model.table} ${whereClause};`;
     },
     generateDuplicadosScript(dateRange) {
@@ -120,6 +126,9 @@ const controller = {
     },
     generateIntegridadReferencialScript() {
         const field = model.fields[0];
+        if (model.compareTable) {
+            return `SELECT t1.${field} FROM ${model.table} t1 LEFT JOIN ${model.compareTable} t2 ON t1.${field} = t2.${field} WHERE t2.${field} IS NULL;`;
+        }
         return `SELECT t1.${field} FROM ${model.table} t1 LEFT JOIN [tabla_referencia] t2 ON t1.${field} = t2.[campo_referencia] WHERE t2.[campo_referencia] IS NULL;`;
     },
     generateFormatoCampoScript() {
@@ -144,10 +153,16 @@ const controller = {
     },
     generateSumatoriaGrupoScript() {
         const [groupField, sumField] = model.fields;
+        if (model.compareTable) {
+            return `SELECT t1.${groupField}, SUM(t1.${sumField}) AS sum_tabla_1, SUM(t2.${sumField}) AS sum_tabla_2 FROM ${model.table} t1 JOIN ${model.compareTable} t2 ON t1.${groupField} = t2.${groupField} GROUP BY t1.${groupField};`;
+        }
         return `SELECT ${groupField}, SUM(${sumField}) FROM ${model.table} GROUP BY ${groupField};`;
     },
     generateConteoUnicosScript() {
         const field = model.fields[0];
+        if (model.compareTable) {
+            return `SELECT (SELECT COUNT(DISTINCT ${field}) FROM ${model.table}) AS unicos_tabla_1, (SELECT COUNT(DISTINCT ${field}) FROM ${model.compareTable}) AS unicos_tabla_2;`;
+        }
         return `SELECT COUNT(DISTINCT ${field}) FROM ${model.table};`;
     },
     generateCargaSinRegistrosScript() {
