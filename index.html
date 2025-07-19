@@ -4,44 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Script Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>SQL Script Generator</h1>
+        <h1 class="my-4">SQL Script Generator</h1>
         <form id="sql-form">
-            <div class="form-group">
-                <label for="table">Table Name</label>
-                <input type="text" id="table" name="table" required>
+            <div class="mb-3">
+                <label for="table" class="form-label">Table Name</label>
+                <input type="text" class="form-control" id="table" name="table" required>
             </div>
-            <div class="form-group">
-                <label for="fields">Fields (comma separated)</label>
-                <input type="text" id="fields" name="fields" required>
+            <div class="mb-3">
+                <label for="fields" class="form-label">Fields (comma separated)</label>
+                <input type="text" class="form-control" id="fields" name="fields" required>
             </div>
-            <div class="form-group">
-                <label for="filter">Filter (optional)</label>
-                <input type="text" id="filter" name="filter">
+            <div class="mb-3">
+                <label for="filter" class="form-label">Filter (optional)</label>
+                <input type="text" class="form-control" id="filter" name="filter">
             </div>
-            <div class="form-group">
-                <label for="start_date">Start Date (optional)</label>
-                <input type="date" id="start_date" name="start_date">
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date (optional)</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label">End Date (optional)</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="end_date">End Date (optional)</label>
-                <input type="date" id="end_date" name="end_date">
-            </div>
-            <button type="submit">Generate Scripts</button>
+            <button type="submit" class="btn btn-primary">Generate Scripts</button>
         </form>
-        <div id="results">
+        <div id="results" class="mt-5">
             <h2>Generated SQL Scripts</h2>
-            <h3>Nulidad</h3>
-            <pre><code id="nulidad-script"></code></pre>
-            <h3>Totalidad</h3>
-            <pre><code id="totalidad-script"></code></pre>
-            <h3>Duplicados</h3>
-            <pre><code id="duplicados-script"></code></pre>
+            <div class="card my-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Nulidad
+                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('nulidad-script')">Copy</button>
+                </div>
+                <div class="card-body">
+                    <pre><code id="nulidad-script"></code></pre>
+                </div>
+            </div>
+            <div class="card my-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Totalidad
+                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('totalidad-script')">Copy</button>
+                </div>
+                <div class="card-body">
+                    <pre><code id="totalidad-script"></code></pre>
+                </div>
+            </div>
+            <div class="card my-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    Duplicados
+                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('duplicados-script')">Copy</button>
+                </div>
+                <div class="card-body">
+                    <pre><code id="duplicados-script"></code></pre>
+                </div>
+            </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src="script.js"></script>
 </body>
 </html>

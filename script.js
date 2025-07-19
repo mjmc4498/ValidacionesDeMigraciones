@@ -63,3 +63,13 @@ function generateDuplicadosScript(table, fields, filterCondition, dateRange) {
     }
     return `SELECT ${fieldsStr}, COUNT(*) FROM ${table} ${whereClause} GROUP BY ${fieldsStr} HAVING COUNT(*) > 1;`;
 }
+
+function copyToClipboard(elementId) {
+    const codeElement = document.getElementById(elementId);
+    const textToCopy = codeElement.textContent;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Copied to clipboard!');
+    }, (err) => {
+        console.error('Could not copy text: ', err);
+    });
+}
