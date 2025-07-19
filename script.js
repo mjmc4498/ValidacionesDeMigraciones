@@ -10,7 +10,7 @@ const model = {
 const view = {
     updateScripts(scripts) {
         for (const key in scripts) {
-            const element = document.getElementById(`${key}-script`);
+            const element = document.getElementById(key);
             if (element) {
                 element.textContent = scripts[key];
             }
