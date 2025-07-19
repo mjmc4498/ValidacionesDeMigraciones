@@ -1,6 +1,6 @@
-# Generador de Scripts SQL para Validación de Migraciones
+# Pruebas Unitarias de Calidad de Datos
 
-Este proyecto es una herramienta web de frontend puro que genera scripts SQL para validaciones de nulidad, totalidad y duplicados, facilitando el proceso de migración de datos.
+Este proyecto es una herramienta web de frontend puro que genera scripts SQL para pruebas unitarias de calidad de datos, incluyendo validaciones de nulidad, totalidad y duplicados.
 
 ## Demo
 
@@ -44,4 +44,4 @@ Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request p
 
 ## Contacto
 
-Miguel Jonathan Mogrovejo Cardenas - [mjmc4498](https://github.com/mjmc4498)
+Marco Josue Martinez Cruz - [mjmc4498](https://github.com/mjmc4498)
