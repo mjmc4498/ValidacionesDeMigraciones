@@ -7,10 +7,13 @@ const model = {
 };
 
 const view = {
-    updateScripts(nulidad, totalidad, duplicados) {
-        document.getElementById('nulidad-script').textContent = nulidad;
-        document.getElementById('totalidad-script').textContent = totalidad;
-        document.getElementById('duplicados-script').textContent = duplicados;
+    updateScripts(scripts) {
+        for (const key in scripts) {
+            const element = document.getElementById(`${key}-script`);
+            if (element) {
+                element.textContent = scripts[key];
+            }
+        }
     },
     showAlert(message) {
         alert(message);
@@ -26,8 +29,8 @@ const controller = {
     },
     handleFormSubmit() {
         this.updateModel();
-        const { nulidad, totalidad, duplicados } = this.generateScripts();
-        view.updateScripts(nulidad, totalidad, duplicados);
+        const scripts = this.generateScripts();
+        view.updateScripts(scripts);
     },
     updateModel() {
         model.table = document.getElementById('table').value;
@@ -38,10 +41,24 @@ const controller = {
     },
     generateScripts() {
         const dateRange = this.getDateRange();
-        const nulidad = this.generateNulidadScript(dateRange);
-        const totalidad = this.generateTotalidadScript(dateRange);
-        const duplicados = this.generateDuplicadosScript(dateRange);
-        return { nulidad, totalidad, duplicados };
+        const scripts = {
+            nulidad: this.generateNulidadScript(dateRange),
+            totalidad: this.generateTotalidadScript(dateRange),
+            duplicados: this.generateDuplicadosScript(dateRange),
+            'rango-numerico': this.generateRangoNumericoScript(),
+            'valores-categoricos': this.generateValoresCategoricosScript(),
+            'fecha-rango': this.generateFechaRangoScript(),
+            'integridad-referencial': this.generateIntegridadReferencialScript(),
+            'formato-campo': this.generateFormatoCampoScript(),
+            'consistencia-campos': this.generateConsistenciaCamposScript(),
+            'porcentaje-nulos': this.generatePorcentajeNulosScript(),
+            'valores-fuera-tendencia': this.generateValoresFueraTendenciaScript(),
+            'longitud-texto': this.generateLongitudTextoScript(),
+            'sumatoria-grupo': this.generateSumatoriaGrupoScript(),
+            'conteo-unicos': this.generateConteoUnicosScript(),
+            'carga-sin-registros': this.generateCargaSinRegistrosScript(),
+        };
+        return scripts;
     },
     getDateRange() {
         if (model.startDate && model.endDate) {
@@ -50,7 +67,7 @@ const controller = {
         return "";
     },
     generateNulidadScript(dateRange) {
-        const fieldsToCheck = model.fields.map(field => `${field} IS NULL`).join(' AND ');
+        const fieldsToCheck = model.fields.map(field => `${field} IS NULL`).join(' OR ');
         let whereClause = `WHERE ${fieldsToCheck}`;
         if (model.filter) {
             whereClause += ` AND ${model.filter}`;
@@ -88,6 +105,53 @@ const controller = {
             whereClause = "WHERE " + conditions.join(" AND ");
         }
         return `SELECT ${fieldsStr}, COUNT(*) FROM ${model.table} ${whereClause} GROUP BY ${fieldsStr} HAVING COUNT(*) > 1;`;
+    },
+    generateRangoNumericoScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE ${field} NOT BETWEEN [valor_minimo] AND [valor_maximo];`;
+    },
+    generateValoresCategoricosScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE ${field} NOT IN ('valor1', 'valor2', '...'));`;
+    },
+    generateFechaRangoScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE ${field} NOT BETWEEN '[fecha_inicio]' AND '[fecha_fin]';`;
+    },
+    generateIntegridadReferencialScript() {
+        const field = model.fields[0];
+        return `SELECT t1.${field} FROM ${model.table} t1 LEFT JOIN [tabla_referencia] t2 ON t1.${field} = t2.[campo_referencia] WHERE t2.[campo_referencia] IS NULL;`;
+    },
+    generateFormatoCampoScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE ${field} NOT LIKE '[formato]'; -- Ejemplo: '____-__-__' para fechas`;
+    },
+    generateConsistenciaCamposScript() {
+        const [field1, field2] = model.fields;
+        return `SELECT ${field1}, ${field2} FROM ${model.table} WHERE NOT ([condicion_consistencia]); -- Ejemplo: campo_pais = 'USA' AND campo_moneda != 'USD'`;
+    },
+    generatePorcentajeNulosScript() {
+        const field = model.fields[0];
+        return `SELECT (COUNT(*) - COUNT(${field})) * 100.0 / COUNT(*) AS porcentaje_nulos FROM ${model.table};`;
+    },
+    generateValoresFueraTendenciaScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE ${field} > (SELECT AVG(${field}) + 3 * STDDEV(${field}) FROM ${model.table}); -- Detecta valores atípicos (outliers)`;
+    },
+    generateLongitudTextoScript() {
+        const field = model.fields[0];
+        return `SELECT ${field} FROM ${model.table} WHERE LENGTH(${field}) > [longitud_maxima];`;
+    },
+    generateSumatoriaGrupoScript() {
+        const [groupField, sumField] = model.fields;
+        return `SELECT ${groupField}, SUM(${sumField}) FROM ${model.table} GROUP BY ${groupField};`;
+    },
+    generateConteoUnicosScript() {
+        const field = model.fields[0];
+        return `SELECT COUNT(DISTINCT ${field}) FROM ${model.table};`;
+    },
+    generateCargaSinRegistrosScript() {
+        return `SELECT CASE WHEN COUNT(*) = 0 THEN 'Carga sin registros' ELSE 'Carga con registros' END FROM ${model.table};`;
     }
 };
 

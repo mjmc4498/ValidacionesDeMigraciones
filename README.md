@@ -44,4 +44,4 @@ Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request p
 
 ## Contacto
 
-Miguel Jonathan Mogrovejo Cardenas - [mjmc4498](https://github.com/mjmc4498)
+Marco Josue Martinez Cruz - [mjmc4498](https://github.com/mjmc4498)
