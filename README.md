@@ -1,6 +1,6 @@
 # Pruebas Unitarias de Calidad de Datos
 
-Este proyecto es una herramienta web de frontend puro que genera scripts SQL para pruebas unitarias de calidad de datos, incluyendo validaciones de nulidad, totalidad y duplicados.
+Este proyecto es una herramienta web de frontend puro que genera scripts SQL para una amplia variedad de pruebas unitarias de calidad de datos.
 
 ## Demo
 
@@ -19,16 +19,33 @@ cd ValidacionesDeMigraciones
 ## Manual del Sistema y Uso
 
 1.  **Nombre de la Tabla:** Ingresa el nombre de la tabla de la base de datos que deseas validar.
-2.  **Campos:** Ingresa los nombres de los campos (columnas) que deseas incluir en la validación, separados por comas.
-3.  **Filtro (opcional):** Agrega cualquier condición `WHERE` adicional para filtrar los datos.
-4.  **Fecha de Inicio y Fin (opcional):** Selecciona un rango de fechas para limitar la validación a un período de tiempo específico.
-5.  Haz clic en **"Generar Scripts"**.
+2.  **Tabla a Comparar (opcional):** Ingresa el nombre de una tabla para comparar (por ejemplo, antes de una migración).
+3.  **Campos:** Ingresa los nombres de los campos (columnas) que deseas incluir en la validación, separados por comas.
+4.  **Filtro (opcional):** Agrega cualquier condición `WHERE` adicional para filtrar los datos.
+5.  **Fecha de Inicio y Fin (opcional):** Selecciona un rango de fechas para limitar la validación a un período de tiempo específico.
+6.  Haz clic en **"Generar Scripts"**.
 
-La aplicación generará y mostrará los siguientes scripts SQL:
+La aplicación generará y mostrará una variedad de scripts SQL, incluyendo:
 
-*   **Nulidad:** Verifica si alguno de los campos especificados es nulo.
-*   **Totalidad:** Cuenta el número total de registros en la tabla (con el filtro opcional).
-*   **Duplicados:** Encuentra registros duplicados basados en los campos especificados.
+*   Nulidad
+*   Totalidad
+*   Duplicados
+*   Rango Numérico Válido
+*   Valores Categóricos Válidos
+*   Fecha en Rango Aceptable
+*   Integridad Referencial
+*   Formato de Campo
+*   Consistencia entre Campos
+*   Porcentaje de Nulos
+*   Valores Fuera de Tendencia
+*   Longitud de Texto
+*   Sumatoria por Grupo
+*   Conteo de Registros Únicos
+*   Carga sin Registros
+
+## Exportar a Excel
+
+Puedes exportar todos los scripts generados a un archivo de Excel haciendo clic en el botón **"Exportar a Excel"**.
 
 ## Estructura del Código (MVC)
 
