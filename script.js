@@ -1,74 +1,103 @@
-document.getElementById('sql-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+const model = {
+    table: '',
+    fields: [],
+    filter: '',
+    startDate: '',
+    endDate: '',
+};
 
-    const table = document.getElementById('table').value;
-    const fields = document.getElementById('fields').value.split(',').map(field => field.trim());
-    const filter = document.getElementById('filter').value;
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
+const view = {
+    updateScripts(nulidad, totalidad, duplicados) {
+        document.getElementById('nulidad-script').textContent = nulidad;
+        document.getElementById('totalidad-script').textContent = totalidad;
+        document.getElementById('duplicados-script').textContent = duplicados;
+    },
+    showAlert(message) {
+        alert(message);
+    }
+};
 
-    let dateRange = "";
-    if (startDate && endDate) {
-        dateRange = `fecha BETWEEN '${startDate}' AND '${endDate}'`;
+const controller = {
+    init() {
+        document.getElementById('sql-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            this.handleFormSubmit();
+        });
+    },
+    handleFormSubmit() {
+        this.updateModel();
+        const { nulidad, totalidad, duplicados } = this.generateScripts();
+        view.updateScripts(nulidad, totalidad, duplicados);
+    },
+    updateModel() {
+        model.table = document.getElementById('table').value;
+        model.fields = document.getElementById('fields').value.split(',').map(field => field.trim());
+        model.filter = document.getElementById('filter').value;
+        model.startDate = document.getElementById('start_date').value;
+        model.endDate = document.getElementById('end_date').value;
+    },
+    generateScripts() {
+        const dateRange = this.getDateRange();
+        const nulidad = this.generateNulidadScript(dateRange);
+        const totalidad = this.generateTotalidadScript(dateRange);
+        const duplicados = this.generateDuplicadosScript(dateRange);
+        return { nulidad, totalidad, duplicados };
+    },
+    getDateRange() {
+        if (model.startDate && model.endDate) {
+            return `fecha BETWEEN '${model.startDate}' AND '${model.endDate}'`;
+        }
+        return "";
+    },
+    generateNulidadScript(dateRange) {
+        const fieldsToCheck = model.fields.map(field => `${field} IS NULL`).join(' AND ');
+        let whereClause = `WHERE ${fieldsToCheck}`;
+        if (model.filter) {
+            whereClause += ` AND ${model.filter}`;
+        }
+        if (dateRange) {
+            whereClause += ` AND ${dateRange}`;
+        }
+        return `SELECT ${model.fields.join(', ')} FROM ${model.table} ${whereClause};`;
+    },
+    generateTotalidadScript(dateRange) {
+        let whereClause = "";
+        const conditions = [];
+        if (model.filter) {
+            conditions.push(model.filter);
+        }
+        if (dateRange) {
+            conditions.push(dateRange);
+        }
+        if (conditions.length > 0) {
+            whereClause = "WHERE " + conditions.join(" AND ");
+        }
+        return `SELECT COUNT(*) FROM ${model.table} ${whereClause};`;
+    },
+    generateDuplicadosScript(dateRange) {
+        const fieldsStr = model.fields.join(', ');
+        let whereClause = "";
+        const conditions = [];
+        if (model.filter) {
+            conditions.push(model.filter);
+        }
+        if (dateRange) {
+            conditions.push(dateRange);
+        }
+        if (conditions.length > 0) {
+            whereClause = "WHERE " + conditions.join(" AND ");
+        }
+        return `SELECT ${fieldsStr}, COUNT(*) FROM ${model.table} ${whereClause} GROUP BY ${fieldsStr} HAVING COUNT(*) > 1;`;
     }
+};
 
-    const nulidadScript = generateNulidadScript(table, fields, filter, dateRange);
-    const totalidadScript = generateTotalidadScript(table, filter, dateRange);
-    const duplicadosScript = generateDuplicadosScript(table, fields, filter, dateRange);
-
-    document.getElementById('nulidad-script').textContent = nulidadScript;
-    document.getElementById('totalidad-script').textContent = totalidadScript;
-    document.getElementById('duplicados-script').textContent = duplicadosScript;
-});
-
-function generateNulidadScript(table, fields, filterCondition, dateRange) {
-    const fieldsToCheck = fields.map(field => `${field} IS NULL`).join(' AND ');
-    let whereClause = `WHERE ${fieldsToCheck}`;
-    if (filterCondition) {
-        whereClause += ` AND ${filterCondition}`;
-    }
-    if (dateRange) {
-        whereClause += ` AND ${dateRange}`;
-    }
-    return `SELECT ${fields.join(', ')} FROM ${table} ${whereClause};`;
-}
-
-function generateTotalidadScript(table, filterCondition, dateRange) {
-    let whereClause = "";
-    const conditions = [];
-    if (filterCondition) {
-        conditions.push(filterCondition);
-    }
-    if (dateRange) {
-        conditions.push(dateRange);
-    }
-    if (conditions.length > 0) {
-        whereClause = "WHERE " + conditions.join(" AND ");
-    }
-    return `SELECT COUNT(*) FROM ${table} ${whereClause};`;
-}
-
-function generateDuplicadosScript(table, fields, filterCondition, dateRange) {
-    const fieldsStr = fields.join(', ');
-    let whereClause = "";
-    const conditions = [];
-    if (filterCondition) {
-        conditions.push(filterCondition);
-    }
-    if (dateRange) {
-        conditions.push(dateRange);
-    }
-    if (conditions.length > 0) {
-        whereClause = "WHERE " + conditions.join(" AND ");
-    }
-    return `SELECT ${fieldsStr}, COUNT(*) FROM ${table} ${whereClause} GROUP BY ${fieldsStr} HAVING COUNT(*) > 1;`;
-}
+controller.init();
 
 function copyToClipboard(elementId) {
     const codeElement = document.getElementById(elementId);
     const textToCopy = codeElement.textContent;
     navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('¡Copiado al portapapeles!');
+        view.showAlert('¡Copiado al portapapeles!');
     }, (err) => {
         console.error('No se pudo copiar el texto: ', err);
     });
