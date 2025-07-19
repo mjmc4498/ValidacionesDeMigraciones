@@ -5,6 +5,7 @@ const model = {
     filter: '',
     startDate: '',
     endDate: '',
+    scripts: {},
 };
 
 const view = {
@@ -27,11 +28,14 @@ const controller = {
             event.preventDefault();
             this.handleFormSubmit();
         });
+        document.getElementById('export-button').addEventListener('click', () => {
+            this.exportScripts();
+        });
     },
     handleFormSubmit() {
         this.updateModel();
-        const scripts = this.generateScripts();
-        view.updateScripts(scripts);
+        model.scripts = this.generateScripts();
+        view.updateScripts(model.scripts);
     },
     updateModel() {
         model.table = document.getElementById('table').value;
@@ -44,21 +48,21 @@ const controller = {
     generateScripts() {
         const dateRange = this.getDateRange();
         const scripts = {
-            nulidad: this.generateNulidadScript(dateRange),
-            totalidad: this.generateTotalidadScript(dateRange),
-            duplicados: this.generateDuplicadosScript(dateRange),
-            'rango-numerico': this.generateRangoNumericoScript(),
-            'valores-categoricos': this.generateValoresCategoricosScript(),
-            'fecha-rango': this.generateFechaRangoScript(),
-            'integridad-referencial': this.generateIntegridadReferencialScript(),
-            'formato-campo': this.generateFormatoCampoScript(),
-            'consistencia-campos': this.generateConsistenciaCamposScript(),
-            'porcentaje-nulos': this.generatePorcentajeNulosScript(),
-            'valores-fuera-tendencia': this.generateValoresFueraTendenciaScript(),
-            'longitud-texto': this.generateLongitudTextoScript(),
-            'sumatoria-grupo': this.generateSumatoriaGrupoScript(),
-            'conteo-unicos': this.generateConteoUnicosScript(),
-            'carga-sin-registros': this.generateCargaSinRegistrosScript(),
+            'nulidad-script': this.generateNulidadScript(dateRange),
+            'totalidad-script': this.generateTotalidadScript(dateRange),
+            'duplicados-script': this.generateDuplicadosScript(dateRange),
+            'rango-numerico-script': this.generateRangoNumericoScript(),
+            'valores-categoricos-script': this.generateValoresCategoricosScript(),
+            'fecha-rango-script': this.generateFechaRangoScript(),
+            'integridad-referencial-script': this.generateIntegridadReferencialScript(),
+            'formato-campo-script': this.generateFormatoCampoScript(),
+            'consistencia-campos-script': this.generateConsistenciaCamposScript(),
+            'porcentaje-nulos-script': this.generatePorcentajeNulosScript(),
+            'valores-fuera-tendencia-script': this.generateValoresFueraTendenciaScript(),
+            'longitud-texto-script': this.generateLongitudTextoScript(),
+            'sumatoria-grupo-script': this.generateSumatoriaGrupoScript(),
+            'conteo-unicos-script': this.generateConteoUnicosScript(),
+            'carga-sin-registros-script': this.generateCargaSinRegistrosScript(),
         };
         return scripts;
     },
@@ -167,6 +171,20 @@ const controller = {
     },
     generateCargaSinRegistrosScript() {
         return `SELECT CASE WHEN COUNT(*) = 0 THEN 'Carga sin registros' ELSE 'Carga con registros' END FROM ${model.table};`;
+    },
+    exportScripts() {
+        let sqlContent = "";
+        for (const key in model.scripts) {
+            const scriptName = key.replace('-script', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            sqlContent += `-- ${scriptName}\n`;
+            sqlContent += `${model.scripts[key]}\n\n`;
+        }
+
+        const blob = new Blob([sqlContent], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'scripts.sql';
+        link.click();
     }
 };
 
