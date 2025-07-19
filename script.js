@@ -11,7 +11,7 @@ const model = {
 const view = {
     updateScripts(scripts) {
         for (const key in scripts) {
-            const element = document.getElementById(key);
+            const element = document.getElementById(`${key}-script`);
             if (element) {
                 element.textContent = scripts[key];
             }
@@ -48,21 +48,21 @@ const controller = {
     generateScripts() {
         const dateRange = this.getDateRange();
         const scripts = {
-            'nulidad-script': this.generateNulidadScript(dateRange),
-            'totalidad-script': this.generateTotalidadScript(dateRange),
-            'duplicados-script': this.generateDuplicadosScript(dateRange),
-            'rango-numerico-script': this.generateRangoNumericoScript(),
-            'valores-categoricos-script': this.generateValoresCategoricosScript(),
-            'fecha-rango-script': this.generateFechaRangoScript(),
-            'integridad-referencial-script': this.generateIntegridadReferencialScript(),
-            'formato-campo-script': this.generateFormatoCampoScript(),
-            'consistencia-campos-script': this.generateConsistenciaCamposScript(),
-            'porcentaje-nulos-script': this.generatePorcentajeNulosScript(),
-            'valores-fuera-tendencia-script': this.generateValoresFueraTendenciaScript(),
-            'longitud-texto-script': this.generateLongitudTextoScript(),
-            'sumatoria-grupo-script': this.generateSumatoriaGrupoScript(),
-            'conteo-unicos-script': this.generateConteoUnicosScript(),
-            'carga-sin-registros-script': this.generateCargaSinRegistrosScript(),
+            nulidad: this.generateNulidadScript(dateRange),
+            totalidad: this.generateTotalidadScript(dateRange),
+            duplicados: this.generateDuplicadosScript(dateRange),
+            'rango-numerico': this.generateRangoNumericoScript(),
+            'valores-categoricos': this.generateValoresCategoricosScript(),
+            'fecha-rango': this.generateFechaRangoScript(),
+            'integridad-referencial': this.generateIntegridadReferencialScript(),
+            'formato-campo': this.generateFormatoCampoScript(),
+            'consistencia-campos': this.generateConsistenciaCamposScript(),
+            'porcentaje-nulos': this.generatePorcentajeNulosScript(),
+            'valores-fuera-tendencia': this.generateValoresFueraTendenciaScript(),
+            'longitud-texto': this.generateLongitudTextoScript(),
+            'sumatoria-grupo': this.generateSumatoriaGrupoScript(),
+            'conteo-unicos': this.generateConteoUnicosScript(),
+            'carga-sin-registros': this.generateCargaSinRegistrosScript(),
         };
         return scripts;
     },
@@ -173,18 +173,15 @@ const controller = {
         return `SELECT CASE WHEN COUNT(*) = 0 THEN 'Carga sin registros' ELSE 'Carga con registros' END FROM ${model.table};`;
     },
     exportScripts() {
-        let sqlContent = "";
-        for (const key in model.scripts) {
-            const scriptName = key.replace('-script', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-            sqlContent += `-- ${scriptName}\n`;
-            sqlContent += `${model.scripts[key]}\n\n`;
-        }
+        const data = Object.entries(model.scripts).map(([key, value]) => {
+            const scriptName = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            return { 'Prueba': scriptName, 'Script': value };
+        });
 
-        const blob = new Blob([sqlContent], { type: 'text/plain;charset=utf-8' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'scripts.sql';
-        link.click();
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Scripts de Calidad de Datos");
+        XLSX.writeFile(wb, "scripts_calidad_datos.xlsx");
     }
 };
 
