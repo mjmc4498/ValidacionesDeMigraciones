@@ -8,64 +8,72 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1 class="my-4">SQL Script Generator</h1>
-        <form id="sql-form">
-            <div class="mb-3">
-                <label for="table" class="form-label">Table Name</label>
-                <input type="text" class="form-control" id="table" name="table" required>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="generator-container">
+                    <h1 class="my-4">SQL Script Generator</h1>
+                    <form id="sql-form">
+                        <div class="mb-3">
+                            <label for="table" class="form-label">Table Name</label>
+                            <input type="text" class="form-control" id="table" name="table" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fields" class="form-label">Fields (comma separated)</label>
+                            <input type="text" class="form-control" id="fields" name="fields" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filter" class="form-label">Filter (optional)</label>
+                            <input type="text" class="form-control" id="filter" name="filter">
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Start Date (optional)</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date (optional)</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Scripts</button>
+                    </form>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="fields" class="form-label">Fields (comma separated)</label>
-                <input type="text" class="form-control" id="fields" name="fields" required>
-            </div>
-            <div class="mb-3">
-                <label for="filter" class="form-label">Filter (optional)</label>
-                <input type="text" class="form-control" id="filter" name="filter">
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="mb-3">
-                        <label for="start_date" class="form-label">Start Date (optional)</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date">
+            <div class="col-md-7">
+                <div id="results" class="mt-4">
+                    <h2>Generated SQL Scripts</h2>
+                    <div class="card my-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            Nulidad
+                            <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('nulidad-script')">Copy</button>
+                        </div>
+                        <div class="card-body">
+                            <pre><code id="nulidad-script"></code></pre>
+                        </div>
                     </div>
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                        <label for="end_date" class="form-label">End Date (optional)</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    <div class="card my-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            Totalidad
+                            <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('totalidad-script')">Copy</button>
+                        </div>
+                        <div class="card-body">
+                            <pre><code id="totalidad-script"></code></pre>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Generate Scripts</button>
-        </form>
-        <div id="results" class="mt-5">
-            <h2>Generated SQL Scripts</h2>
-            <div class="card my-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    Nulidad
-                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('nulidad-script')">Copy</button>
-                </div>
-                <div class="card-body">
-                    <pre><code id="nulidad-script"></code></pre>
-                </div>
-            </div>
-            <div class="card my-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    Totalidad
-                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('totalidad-script')">Copy</button>
-                </div>
-                <div class="card-body">
-                    <pre><code id="totalidad-script"></code></pre>
-                </div>
-            </div>
-            <div class="card my-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    Duplicados
-                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('duplicados-script')">Copy</button>
-                </div>
-                <div class="card-body">
-                    <pre><code id="duplicados-script"></code></pre>
+                    <div class="card my-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            Duplicados
+                            <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('duplicados-script')">Copy</button>
+                        </div>
+                        <div class="card-body">
+                            <pre><code id="duplicados-script"></code></pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
