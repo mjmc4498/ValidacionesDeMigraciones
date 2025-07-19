@@ -68,8 +68,8 @@ function copyToClipboard(elementId) {
     const codeElement = document.getElementById(elementId);
     const textToCopy = codeElement.textContent;
     navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Copied to clipboard!');
+        alert('¡Copiado al portapapeles!');
     }, (err) => {
-        console.error('Could not copy text: ', err);
+        console.error('No se pudo copiar el texto: ', err);
     });
 }
