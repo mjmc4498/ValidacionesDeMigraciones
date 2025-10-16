@@ -140,8 +140,79 @@ const controller = {
         return `SELECT ${field} FROM ${model.table} WHERE ${field} NOT LIKE '[formato]'; -- Ejemplo: '____-__-__' para fechas`;
     },
     generateConsistenciaCamposScript() {
-        const [field1, field2] = model.fields;
-        return `SELECT ${field1}, ${field2} FROM ${model.table} WHERE NOT ([condicion_consistencia]); -- Ejemplo: campo_pais = 'USA' AND campo_moneda != 'USD'`;
+        // This function generates a script to compare fields between two tables.
+        // The user's request included a reference query that uses INFORMATION_SCHEMA to dynamically
+        // discover columns. In this frontend-only environment, we cannot execute such a query.
+        // Therefore, we rely on the user to provide the primary key and the fields to compare.
+
+        if (!model.table || !model.compareTable) {
+            return `/*\n  Instrucciones:\n  Para esta validación, debe proporcionar tanto el 'Nombre de la Tabla' (origen) como la 'Tabla a Comparar' (destino).\n*/\n\nSELECT 'Se requiere una tabla de origen y una tabla para comparar.' AS Error;`;
+        }
+
+        if (model.fields.length < 2) {
+            return `/*\n  Instrucciones para la Validación de Consistencia de Campos:\n\n  1. Proporcione la clave primaria como el PRIMER campo en la lista de 'Campos'.\n  2. Proporcione todos los demás campos que desea comparar después de la clave primaria.\n\n  Ejemplo de Campos: id_cliente,nombre,apellido,email\n*/\n\nSELECT 'Se requiere al menos una clave primaria y un campo para comparar.' AS Error;`;
+        }
+
+        const primaryKey = model.fields[0];
+        const fieldsToCompare = model.fields.slice(1);
+
+        // This logic is inspired by the user's reference query. It builds the comparison clause for each field.
+        const comparisons = fieldsToCompare.map(field =>
+            `A.${field} AS valor_origen_${field}, B.${field} AS valor_destino_${field}, CASE WHEN A.${field} IS NULL AND B.${field} IS NULL THEN 'IGUAL' WHEN UPPER(TRIM(CAST(A.${field} AS STRING))) = UPPER(TRIM(CAST(B.${field} AS STRING))) THEN 'IGUAL' ELSE 'DIFERENTE' END AS estado_${field}`
+        ).join(',\n           ');
+
+        const dateRange = this.getDateRange();
+        let origenFilter = "";
+        const origenConditions = [];
+        if (model.filter) {
+            origenConditions.push(model.filter);
+        }
+        if (dateRange) {
+            origenConditions.push(dateRange); // The hardcoded field name 'fecha' comes from getDateRange()
+        }
+        if(origenConditions.length > 0) {
+            origenFilter = "\n    WHERE " + origenConditions.join(" AND ");
+        }
+
+        const finalWhereClauses = fieldsToCompare.map(f => `NOT (UPPER(TRIM(CAST(A.${f} AS STRING))) = UPPER(TRIM(CAST(B.${f} AS STRING))) OR (A.${f} IS NULL AND B.${f} IS NULL))`);
+
+
+        return `
+-- Validación de Consistencia de Campos
+-- Compara los campos especificados entre la tabla de origen y la de destino, mostrando solo las diferencias.
+-- La primera columna '${primaryKey}' se utiliza como clave de unión (JOIN key).
+
+WITH origen AS (
+    -- Selecciona los datos de la tabla de origen aplicando los filtros
+    SELECT *
+    FROM ${model.table}${origenFilter}
+),
+destino AS (
+    -- Selecciona todos los datos de la tabla de destino
+    SELECT *
+    FROM ${model.compareTable}
+)
+SELECT
+    -- Clave primaria y estado general del registro
+    COALESCE(A.${primaryKey}, B.${primaryKey}) AS ${primaryKey},
+    CASE
+        WHEN A.${primaryKey} IS NOT NULL AND B.${primaryKey} IS NOT NULL THEN 'MODIFICADO'
+        WHEN A.${primaryKey} IS NOT NULL AND B.${primaryKey} IS NULL THEN 'SOLO EN ORIGEN'
+        WHEN A.${primaryKey} IS NULL AND B.${primaryKey} IS NOT NULL THEN 'SOLO EN DESTINO'
+    END AS estado_general,
+
+    -- Comparación detallada de cada campo
+    ${comparisons}
+
+FROM origen A
+FULL OUTER JOIN destino B ON A.${primaryKey} = B.${primaryKey}
+WHERE
+    -- Filtra para mostrar solo registros que no existen en una de las tablas o que tienen diferencias en los campos comparados
+    A.${primaryKey} IS NULL
+    OR B.${primaryKey} IS NULL
+    OR (${finalWhereClauses.join('\n    OR ')})
+;
+        `.trim();
     },
     generatePorcentajeNulosScript() {
         const field = model.fields[0];
